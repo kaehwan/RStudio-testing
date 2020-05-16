@@ -105,3 +105,30 @@ iris %>%
   mutate(PW.group = cut(Petal.Width, cut.point, labels = cp.labels)) %>% 
   sample_n(10) %>% 
   view()
+
+
+# package: tabyl ----------------------------------------------------------
+
+pacman::p_load(janitor)
+
+# one-way tabyl
+cw <- readxl::read_excel("./chick_weight.xlsx", sheet = 2)
+cw %>% tabyl(feed)  
+# though there is missing values, a "valid_percent" will be output
+
+# two-way tabyl: two-way tabulation between feed and weight category
+brk <- c(-Inf, 200, 300, Inf)
+brk.labels <- c("low", "medium", "high")
+
+tb <- cw %>% 
+  mutate(grp = cut(weight, brk, labels = brk.labels)) %>% 
+  tabyl(feed, grp) %>% 
+  arrange(low, medium, high)
+print(tb)
+
+# pair tabyl() with adorn_* to get more info
+tb %>% 
+  adorn_totals("col") %>% 
+  adorn_percentages("row") %>% 
+  adorn_pct_formatting(digits = 0) %>% 
+  adorn_ns(position = "front")
